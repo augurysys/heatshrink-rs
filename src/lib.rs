@@ -1,5 +1,4 @@
 #[repr(C)]
-#[derive(Debug)]
 pub struct HeatshrinkDecoder {
     input_size: u16,
     input_index: u16,
@@ -9,10 +8,12 @@ pub struct HeatshrinkDecoder {
     state: u8,
     current_byte: u8,
     bit_index: u8,
+    buffers: [u8; 1056],
 }
 
 #[repr(C)]
 #[derive(Debug)]
+#[derive(Eq, PartialEq)]
 pub enum HSD_sink_res {
     Ok,
     Full,
@@ -21,6 +22,7 @@ pub enum HSD_sink_res {
 
 #[repr(C)]
 #[derive(Debug)]
+#[derive(Eq, PartialEq)]
 pub enum HSD_poll_res {
     Empty,
     More,
@@ -30,6 +32,7 @@ pub enum HSD_poll_res {
 
 #[repr(C)]
 #[derive(Debug)]
+#[derive(Eq, PartialEq)]
 pub enum HSD_finish_res {
     Done,
     More,
@@ -51,7 +54,7 @@ extern "C" {
         out_buf_size: usize,
         output_size: *mut usize,
     ) -> HSD_poll_res;
-    fn heatshrink_decoder_finish(heatshrink_decoder: *mut HeatshrinkDecoder);
+    fn heatshrink_decoder_finish(heatshrink_decoder: *mut HeatshrinkDecoder) -> HSD_finish_res;
 }
 
 impl HeatshrinkDecoder {
@@ -65,6 +68,7 @@ impl HeatshrinkDecoder {
             state: 0,
             current_byte: 0,
             bit_index: 0,
+            buffers: [0; 1056],
         }
     }
 
@@ -82,9 +86,9 @@ impl HeatshrinkDecoder {
         unsafe { heatshrink_decoder_poll(self, out_buf.as_mut_ptr(), out_buf.len(), output_size) }
     }
 
-    pub fn finish(&mut self) {
+    pub fn finish(&mut self) -> HSD_finish_res {
         unsafe {
-            heatshrink_decoder_finish(self);
+            heatshrink_decoder_finish(self)
         }
     }
 }

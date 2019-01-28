@@ -3,4 +3,8 @@ name = "heatshrink"
 version = "0.1.0"
 authors = ["Gal Ben-Haim <gbenhaim@augury.com>"]
 
+[lib]
+name = "heatshrink"
+path = "src/lib.rs"
+
 [dependencies]
